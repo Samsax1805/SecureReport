@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureReport - Incident Reporting System</title>
+    
+    <!-- IndexedDB Library (Dexie.js) - 500MB+ Storage -->
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Leaflet CSS (Free Maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Local CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; 
+               script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://maps.googleapis.com; 
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; 
+               font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+               connect-src 'self' https://*.supabase.co https://unpkg.com https://cdn.jsdelivr.net; 
+               img-src 'self' https: blob: data:; 
+               frame-src 'self' https://www.google.com https://www.openstreetmap.org;">
+</head>
+<body>
+
+<!-- ==================== PAGE 1: LOGIN ==================== -->
+<div class="page active" id="login-page">
+    <div class="login-container">
+        <div class="login-wrapper">
+            <div class="login-left">
+                <h1>SecureReport</h1>
+                <p>Report incidents securely. Track progress. Stay protected.</p>
+                <ul class="login-features">
+                    <li><i class="fas fa-shield-alt"></i> Secure & Encrypted Reporting</li>
+                    <li><i class="fas fa-user-secret"></i> Anonymous Reporting Available</li>
+                    
+<div class="divider">
+  <span>OR</span>
+</div>
+
+<button class="anonymous-btn" onclick="navigateTo('anonymous-report')">
+  <i class="fas fa-user-secret"></i> Report Incident Anonymously
+</button>
+
+<!-- ADD THIS NEW BUTTON -->
+<button class="btn btn-outline" onclick="navigateTo('anonymous-track')" style="margin-top:12px;width:100%;">
+  <i class="fas fa-search"></i> Track Anonymous Report
+</button>
+
+<p class="text-center mt-3">
+  Don't have an account? 
+  <a href="#" class="text-purple" onclick="navigateTo('signup-page')">Sign Up</a>
+</p>
+                    <li><i class="fas fa-chart-line"></i> Real-time Status Tracking</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Location-based Incidents</li>
+                    <li><i class="fas fa-bell"></i> Instant Notifications</li>
+                </ul>
+            </div>
+            <div class="login-right">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+                    <span class="logo-text">SecureReport</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p class="login-subtitle">Sign in to access your dashboard</p>
+
+                <div id="login-form">
+                    <div class="form-group">
+                        <label>Login As</label>
+                        <div class="role-selector">
+                            <div class="role-card active" onclick="selectRole(this, 'student')">
+                                <i class="fas fa-user-graduate"></i>
+                                <span>Student</span>
+                            </div>
+                            <div class="role-card" onclick="selectRole(this, 'security')">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Security</span>
+                            </div>
+                            <div class="role-card" onclick="selectRole(this, 'admin')">
+                                <i class="fas fa-user-cog"></i>
+                                <span>Admin</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email / ID</label>
+                        <input type="text" id="login-email" class="form-input" placeholder="Enter your email or ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" class="form-input" placeholder="Enter your password">
+                    </div>
+
+                    <div id="login-error" class="error-message hidden"></div>
+
+                    <button class="btn btn-primary" onclick="handleLogin()">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <button class="anonymous-btn" onclick="navigateTo('anonymous-report')">
+                        <i class="fas fa-user-secret"></i> Report Incident Anonymously
+                    </button>
+
+                    <p class="text-center mt-3">
+                        Don't have an account? 
+                        <a href="#" class="text-purple" onclick="navigateTo('signup-page')">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 2: SIGNUP ==================== -->
+<div class="page" id="signup-page">
+    <div class="login-container">
+        <div class="login-wrapper">
+            <div class="login-left">
+                <h1>Student Registration</h1>
+                <p>Create your student account to report incidents</p>
+                <ul class="login-features">
+                    <li><i class="fas fa-check-circle"></i> Free for All Students</li>
+                    <li><i class="fas fa-lock"></i> Secure Data Encryption</li>
+                    <li><i class="fas fa-bell"></i> Real-time Notifications</li>
+                    <li><i class="fas fa-history"></i> Track All Your Reports</li>
+                </ul>
+            </div>
+            <div class="login-right">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+                    <span class="logo-text">SecureReport</span>
+                </div>
+                <h2>Create Student Account</h2>
+                <p class="login-subtitle">Fill in the details below to get started</p>
+
+                <div class="alert-box info mb-2">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> Security and Admin accounts can only be created by existing administrators.
+                </div>
+
+                <form id="signup-form" onsubmit="event.preventDefault(); handleSignup();">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" class="form-input" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Student Email</label>
+                        <input type="email" id="signup-email" class="form-input" placeholder="student@university.edu" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Student ID Number</label>
+                        <input type="text" id="signup-id" class="form-input" placeholder="Enter your student ID" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Department/Faculty</label>
+                        <select id="signup-department" class="form-select" required>
+                            <option value="">Select department</option>
+                            <option>Engineering</option>
+                            <option>Science</option>
+                            <option>Arts</option>
+                            <option>Business</option>
+                            <option>Medicine</option>
+                            <option>Law</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" class="form-input" placeholder="Create a password" minlength="8" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="signup-confirm-password" class="form-input" placeholder="Confirm your password" minlength="8" required>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="signup-terms" required>
+                            <label for="signup-terms">I agree to the Terms of Service and Privacy Policy</label>
+                        </div>
+                    </div>
+
+                    <div id="signup-error" class="error-message hidden"></div>
+                    <div id="signup-success" class="success-message hidden"></div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Student Account
+                    </button>
+
+                    <p class="text-center mt-3">
+                        Already have an account? 
+                        <a href="#" class="text-purple" onclick="navigateTo('login-page')">Sign In</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 3: ANONYMOUS REPORT ==================== -->
+<div class="page" id="anonymous-report">
+    <div class="main-content" style="margin-left: 0; max-width: 800px; margin: 2rem auto;">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title"><i class="fas fa-user-secret text-purple"></i> Anonymous Incident Report</h2>
+                    <p class="text-sm text-gray mt-1">Your identity will not be recorded. No login required.</p>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="navigateTo('login-page')">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); submitAnonymousReport();">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Incident Type</label>
+                        <select id="anon-type" class="form-select" required>
+                            <option value="">Select incident type</option>
+                            <option>Theft</option>
+                            <option>Harassment</option>
+                            <option>Vandalism</option>
+                            <option>Safety Hazard</option>
+                            <option>Bullying</option>
+                            <option>Medical Emergency</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="anon-priority" class="form-select">
+                            <option>Low</option>
+                            <option selected>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="anon-location" class="form-input" placeholder="Building, floor, room" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" id="anon-datetime" class="form-input" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea id="anon-description" class="form-textarea" placeholder="Describe the incident..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Share Location</label>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="getLocation('anon')">
+                            <i class="fas fa-map-marker-alt"></i> Get Current Location
+                        </button>
+                        <input type="hidden" id="anon-lat">
+                        <input type="hidden" id="anon-lng">
+                        <div id="anon-map-preview" class="hidden mt-2"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Evidence (Image Upload)</label>
+                        <div class="file-upload" onclick="document.getElementById('anon-file').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload</p>
+                            <small class="text-gray">PNG, JPG up to 10MB</small>
+                            <input type="file" id="anon-file" hidden accept="image/*" onchange="previewImage(this, 'anon-preview')">
+                        </div>
+                        <div id="anon-preview" class="image-preview hidden"></div>
+                    </div>
+                </div>
+
+                <div class="form-group full-width mt-3">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="anon-confirm" required>
+                        <label for="anon-confirm">I confirm this report is anonymous and information is true.</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">
+                        <i class="fas fa-paper-plane"></i> Submit Report
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="navigateTo('login-page')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 4: ANONYMOUS TRACK ==================== -->
+<div class="page" id="anonymous-track">
+    <div class="main-content" style="margin-left: 0; max-width: 800px; margin: 2rem auto;">
+        <div class="anon-track-container">
+            <div class="anon-track-card">
+                <div class="anon-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h2>Track Anonymous Report</h2>
+                <p class="text-gray mt-1">Enter your Incident ID to check status</p>
+
+                <div class="anon-input">
+                    <div class="form-group">
+                        <input type="text" id="track-id" class="form-input" placeholder="Enter Incident ID (e.g., ANON-2026-XXX)" style="text-align:center; font-size:1.1rem;">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="trackAnonymousReport()">
+                        <i class="fas fa-search"></i> Track Report
+                    </button>
+                </div>
+
+                <div class="result-box" id="track-result">
+                    <h3 style="margin-bottom:1rem;"><i class="fas fa-check-circle text-purple"></i> Incident Found</h3>
+                    <p><strong>ID:</strong> <span id="track-id-display"></span></p>
+                    <p><strong>Type:</strong> <span id="track-type-display"></span></p>
+                    <p><strong>Status:</strong> <span id="track-status-display"></span></p>
+                    <p class="mt-2"><strong>Last Update:</strong> <span id="track-update-display"></span></p>
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-ghost" onclick="navigateTo('login-page')">
+                        <i class="fas fa-arrow-left"></i> Back to Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+// Check for last incident on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  const lastId = localStorage.getItem('secureReport_lastAnonymousIncident');
+  const lastTime = localStorage.getItem('secureReport_lastAnonymousIncidentTime');
+  
+  if (lastId && lastTime) {
+    const timeDiff = Date.now() - new Date(lastTime).getTime();
+    const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
+    
+    // Show reminder if reported within last 24 hours
+    if (hoursDiff < 24) {
+      const reminder = document.getElementById('last-incident-reminder');
+      const idDisplay = document.getElementById('last-incident-id');
+      
+      if (reminder && idDisplay) {
+        idDisplay.textContent = lastId;
+        reminder.classList.remove('hidden');
+      }
+    }
+  }
+});
+
+function loadLastIncident() {
+  const lastId = localStorage.getItem('secureReport_lastAnonymousIncident');
+  const trackInput = document.getElementById('track-id');
+  
+  if (lastId && trackInput) {
+    trackInput.value = lastId;
+    trackAnonymousReport();
+  }
+}
+</script>
+
+<!-- ==================== PAGE 5: STUDENT DASHBOARD ==================== -->
+<div class="page" id="student-dashboard">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>SecureReport</h3>
+            </div>
+            
+            <div class="user-badge">
+                <div class="user-avatar" id="student-avatar">JD</div>
+                <div class="user-info">
+                    <span id="student-name">Samson john</span>
+                    <small>Student</small>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="#" class="active" onclick="showStudentSection('dashboard')"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" onclick="showStudentSection('report')"><i class="fas fa-plus-circle"></i> Report Incident</a></li>
+                <li><a href="#" onclick="showStudentSection('track')"><i class="fas fa-map-marked-alt"></i> Track Incident</a></li>
+                <div class="nav-section">Account</div>
+                <li><a href="#" onclick="showStudentSection('profile')"><i class="fas fa-user"></i> My Profile</a></li>
+                <li><a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <div>
+                    <h1>Welcome, <span id="student-header-name">Samson</span> 👋</h1>
+                    <p class="text-sm text-gray">Here's a summary of your incidents</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search incidents...">
+                    </div>
+                    <div style="position:relative;">
+                        <button class="btn btn-outline btn-sm" onclick="toggleNotifDropdown()">
+                            <i class="fas fa-bell"></i>
+                            <span id="header-notif-badge" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:#EF4444;color:white;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:600;">0</span>
+                        </button>
+                        <div id="notif-dropdown" class="hidden" style="position:absolute;top:50px;right:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);border:1px solid #e9d5ff;z-index:1000;max-height:400px;overflow-y:auto;">
+                            <div style="padding:16px;border-bottom:1px solid #e5e7eb;font-weight:600;">🔔 Notifications</div>
+                            <div id="notif-list"></div>
+                            <div style="padding:12px;text-align:center;border-top:1px solid #e5e7eb;">
+                                <button onclick="clearNotifications()" style="background:none;border:none;color:#9333EA;cursor:pointer;">Clear all</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="showStudentSection('report')">
+                        <i class="fas fa-plus"></i> New Report
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Student Dashboard View -->
+            <div id="student-dashboard-view">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">My Reports</div>
+                                <div class="stat-value" id="student-total-reports">0</div>
+                            </div>
+                            <div class="stat-icon total"><i class="fas fa-file-alt"></i></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Pending</div>
+                                <div class="stat-value" id="student-pending">0</div>
+                            </div>
+                            <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">In Progress</div>
+                                <div class="stat-value" id="student-progress">0</div>
+                            </div>
+                            <div class="stat-icon progress"><i class="fas fa-spinner"></i></div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <div class="stat-label">Resolved</div>
+                                <div class="stat-value" id="student-resolved">0</div>
+                            </div>
+                            <div class="stat-icon resolved"><i class="fas fa-check-circle"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">My Recent Incidents</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-incidents-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Report Section -->
+            <div id="student-report-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title"><i class="fas fa-plus-circle text-purple"></i> File New Incident Report</h2>
+                            <p class="text-sm text-gray mt-1">Fill in the details below</p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" onclick="showStudentSection('dashboard')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                    <form onsubmit="event.preventDefault(); submitStudentReport();">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Incident Type</label>
+                                <select id="student-report-type" class="form-select" required>
+                                    <option value="">Select type</option>
+                                    <option>Theft</option>
+                                    <option>Harassment</option>
+                                    <option>Vandalism</option>
+                                    <option>Safety Hazard</option>
+                                    <option>Bullying</option>
+                                    <option>Medical Emergency</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Priority Level</label>
+                                <select id="student-report-priority" class="form-select">
+                                    <option>Low</option>
+                                    <option selected>Medium</option>
+                                    <option>High</option>
+                                    <option>Critical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Location</label>
+                                <input type="text" id="student-report-location" class="form-input" placeholder="Building, floor, room" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Share Location</label>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="getLocation('student')">
+                                    <i class="fas fa-map-marker-alt"></i> Get Current Location
+                                </button>
+                                <input type="hidden" id="student-lat">
+                                <input type="hidden" id="student-lng">
+                                <div id="student-map-preview" class="hidden mt-2"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Date & Time</label>
+                                <input type="datetime-local" id="student-report-datetime" class="form-input" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea id="student-report-description" class="form-textarea" placeholder="Describe the incident..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Evidence / Images</label>
+                                <div class="file-upload" onclick="document.getElementById('student-report-file').click()">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Click to upload</p>
+                                    <small class="text-gray">PNG, JPG up to 20MB</small>
+                                    <input type="file" id="student-report-file" hidden accept="image/*" onchange="previewImage(this, 'student-preview')">
+                                </div>
+                                <div id="student-preview" class="image-preview hidden"></div>
+                            </div>
+                            <div class="form-group full-width">
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" id="student-anon">
+                                    <label for="student-anon">Submit anonymously</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary" style="flex:1;">
+                                <i class="fas fa-paper-plane"></i> Submit Report
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="showStudentSection('dashboard')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Student Track Section -->
+            <div id="student-track-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-map-marked-alt text-purple"></i> Track Incident Progress</h2>
+                        <button class="btn btn-outline btn-sm" onclick="showStudentSection('dashboard')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Select an incident:</label>
+                        <select id="student-track-select" class="form-select" onchange="loadStudentTrack()">
+                            <option value="">-- Select Incident --</option>
+                        </select>
+                    </div>
+                    <div id="student-track-detail" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- Student Profile Section -->
+            <div id="student-profile-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-user text-purple"></i> My Profile</h2>
+                        <button class="btn btn-outline btn-sm" onclick="showStudentSection('dashboard')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="profile-name" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profile-email" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" id="profile-id" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" class="form-input" value="Student" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ==================== PAGE 6: SECURITY DASHBOARD ==================== -->
+<div class="page" id="security-dashboard">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>SecureReport</h3>
+            </div>
+            
+            <div class="user-badge">
+                <div class="user-avatar" id="security-avatar">OS</div>
+                <div class="user-info">
+                    <span id="security-name">Officer Smith</span>
+                    <small>Security Staff</small>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="#" class="active" onclick="showSecuritySection('dashboard')"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="#" onclick="showSecuritySection('reports')"><i class="fas fa-clipboard-list"></i> All Reports</a></li>
+                <li><a href="#" onclick="showSecuritySection('analytics')"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                <li><a href="#" onclick="showSecuritySection('map')"><i class="fas fa-map-marked-alt"></i> Incident Map</a></li>
+                <div class="nav-section">Management</div>
+                <li><a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <div>
+                    <h1>Security Dashboard 🛡️</h1>
+                    <p class="text-sm text-gray">Manage and respond to all campus incidents</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search reports...">
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="theme-icon-sec"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Total Reports</div>
+                            <div class="stat-value" id="security-total">0</div>
+                        </div>
+                        <div class="stat-icon total"><i class="fas fa-file-alt"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Pending</div>
+                            <div class="stat-value" id="security-pending">0</div>
+                        </div>
+                        <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">In Progress</div>
+                            <div class="stat-value" id="security-progress">0</div>
+                        </div>
+                        <div class="stat-icon progress"><i class="fas fa-spinner"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Resolved</div>
+                            <div class="stat-value" id="security-resolved">0</div>
+                        </div>
+                        <div class="stat-icon resolved"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Dashboard View -->
+            <div id="security-dashboard-view">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">All Incident Reports</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Priority</th>
+                                    <th>Reported By</th>
+                                    <th>Status</th>
+                                    <th>Assigned</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="security-incidents-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Analytics View -->
+            <div id="security-analytics-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar text-purple"></i> Incident Analytics</h2>
+                    </div>
+                    <div class="chart-grid">
+                        <div class="card">
+                            <h3 class="mb-2">Incidents by Type</h3>
+                            <canvas id="chart-type"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">Monthly Trend</h3>
+                            <canvas id="chart-trend"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">Status Distribution</h3>
+                            <canvas id="chart-status"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">Priority Breakdown</h3>
+                            <canvas id="chart-priority"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Map View -->
+            <div id="security-map-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-map-marked-alt text-purple"></i> Incident Map</h2>
+                    </div>
+                    <div id="map-container" style="height: 600px; border-radius: 12px; overflow: hidden;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ==================== PAGE 7: ADMIN DASHBOARD ==================== -->
+<div class="page" id="admin-dashboard">
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>SecureReport</h3>
+            </div>
+            
+            <div class="user-badge">
+                <div class="user-avatar" id="admin-avatar">AD</div>
+                <div class="user-info">
+                    <span id="admin-name">Admin User</span>
+                    <small>System Administrator</small>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+    <li><a href="#" class="active" onclick="showAdminSection('dashboard'); return false;"><i class="fas fa-home"></i> Dashboard</a></li>
+    <li><a href="#" onclick="showAdminSection('users'); return false;"><i class="fas fa-users-cog"></i> Manage Users</a></li>
+    <li><a href="#" onclick="showAdminSection('settings'); return false;"><i class="fas fa-database"></i> System Settings</a></li>
+    <li><a href="#" onclick="showAdminSection('analytics'); return false;"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+    <div class="nav-section">System</div>
+    <li><a href="#" onclick="showAdminSection('security'); return false;"><i class="fas fa-shield-alt"></i> Security Settings</a></li>
+    <li><a href="#" onclick="handleLogout(); return false;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                <!-- Add this to admin sidebar nav-menu -->
+<li><a href="#" onclick="navigateTo('database-viewer'); updateDatabaseStats();"><i class="fas fa-database"></i> Database Viewer</a></li>
+<li><a href="#" onclick="navigateTo('audit-logs-page'); loadAuditLogs();"><i class="fas fa-shield-alt"></i> Audit Logs</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <div>
+                    <h1>Administration Panel ⚙️</h1>
+                    <p class="text-sm text-gray">Manage users, settings, and system analytics</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary btn-sm" onclick="openModal('add-user-modal')"><i class="fas fa-plus"></i> Add User</button>
+                    <button class="btn btn-outline btn-sm" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="theme-icon-admin"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value" id="admin-total-users">0</div>
+                        </div>
+                        <div class="stat-icon total"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Total Reports</div>
+                            <div class="stat-value" id="admin-total-reports">0</div>
+                        </div>
+                        <div class="stat-icon pending"><i class="fas fa-file-alt"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Active Officers</div>
+                            <div class="stat-value" id="admin-active-officers">0</div>
+                        </div>
+                        <div class="stat-icon progress"><i class="fas fa-user-shield"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Resolution Rate</div>
+                            <div class="stat-value" id="admin-resolution-rate">0%</div>
+                        </div>
+                        <div class="stat-icon resolved"><i class="fas fa-percentage"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard View -->
+            <div id="admin-dashboard-view">
+                <div class="admin-grid">
+                    <div class="admin-card" onclick="showAdminSection('users')">
+                        <div class="admin-card-icon"><i class="fas fa-users-cog"></i></div>
+                        <h3>Manage Users</h3>
+                        <p>Add, edit, or remove students, security staff, and administrators.</p>
+                    </div>
+                    <div class="admin-card" onclick="showAdminSection('settings')">
+                        <div class="admin-card-icon"><i class="fas fa-database"></i></div>
+                        <h3>System Settings</h3>
+                        <p>Configure system parameters, notification preferences, and integrations.</p>
+                    </div>
+                    <div class="admin-card" onclick="showAdminSection('analytics')">
+                        <div class="admin-card-icon"><i class="fas fa-chart-bar"></i></div>
+                        <h3>Analytics</h3>
+                        <p>View detailed reports, trends, and performance metrics.</p>
+                    </div>
+                    <div class="admin-card" onclick="showAdminSection('security')">
+                        <div class="admin-card-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Security Settings</h3>
+                        <p>Manage access control, encryption, and SQL injection protection.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Users View -->
+            <div id="admin-users-view" class="hidden">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h2 class="card-title">User Management</h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-user-search" class="form-input" placeholder="Search users..." style="width:250px;" onkeyup="filterUsers()">
+                        </div>
+                    </div>
+                    <div id="admin-users-list"></div>
+                </div>
+            </div>
+
+            <!-- Admin Settings View -->
+            <div id="admin-settings-view" class="hidden">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-cog text-purple"></i> System Settings</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>System Name</label>
+                            <input type="text" id="setting-system-name" class="form-input" value="SecureReport">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Notifications</label>
+                            <select id="setting-email-notif" class="form-select">
+                                <option value="all">All Incidents</option>
+                                <option value="high">High Priority Only</option>
+                                <option value="none">Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Anonymous Reports</label>
+                            <select id="setting-anonymous" class="form-select">
+                                <option value="enabled">Enabled</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Support/Admin Email</label>
+                            <input type="email" id="setting-support-email" class="form-input" value="admin@securereport.com">
+                            <small class="text-gray text-sm">Email for chatbot "Email Admin" feature</small>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Google Maps API Key</label>
+                            <input type="text" id="setting-maps-key" class="form-input" placeholder="Enter your Google Maps API key">
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="setting-maintenance">
+                                <label for="setting-maintenance">Enable Maintenance Mode</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn btn-primary" onclick="saveSettings()">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                        <button class="btn btn-outline" onclick="resetSettings()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Analytics View -->
+            <div id="admin-analytics-view" class="hidden">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-line text-purple"></i> System Analytics</h2>
+                    </div>
+                    <div class="chart-grid">
+                        <div class="card">
+                            <h3 class="mb-2">Incidents by Type</h3>
+                            <canvas id="admin-chart-type"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">Monthly Trend</h3>
+                            <canvas id="admin-chart-trend"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">User Activity</h3>
+                            <canvas id="admin-chart-users"></canvas>
+                        </div>
+                        <div class="card">
+                            <h3 class="mb-2">Resolution Time</h3>
+                            <canvas id="admin-chart-resolution"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Security Settings View -->
+            <div id="admin-security-view" class="hidden">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-shield-alt text-purple"></i> Security Settings</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Password Policy</label>
+                            <select class="form-select">
+                                <option>Standard (6+ chars)</option>
+                                <option>Strong (8+ chars, special)</option>
+                                <option>Very Strong (12+ chars)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Session Timeout (minutes)</label>
+                            <input type="number" class="form-input" value="30">
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="security-sql-protection" checked>
+                                <label for="security-sql-protection">SQL Injection Protection</label>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" id="security-encryption" checked>
+                                <label for="security-encryption">Data Encryption at Rest</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn btn-primary" onclick="saveSecuritySettings()">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="add-user-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus text-purple"></i> Add New User</h3>
+            <button class="modal-close" onclick="closeModal('add-user-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="add-user-name" class="form-input" placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="add-user-email" class="form-input" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="add-user-role" class="form-select">
+                    <option value="student">Student</option>
+                    <option value="security">Security Staff</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ID Number</label>
+                <input type="text" id="add-user-id" class="form-input" placeholder="Enter ID number">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="add-user-password" class="form-input" placeholder="Create password">
+            </div>
+<div class="form-group">
+    <label>Department</label>
+    <input type="text" id="add-user-department" class="form-input" placeholder="Enter department" value="General">
+</div>
+        </div>
+<div class="modal-footer">
+    <button class="btn btn-outline" onclick="closeModal('add-user-modal')">Cancel</button>
+    <button class="btn btn-primary" onclick="addNewUser()">
+        <i class="fas fa-check"></i> Add User
+    </button>
+</div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="edit-user-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-edit text-purple"></i> Edit User</h3>
+            <button class="modal-close" onclick="closeModal('edit-user-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-user-id">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="edit-user-name" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="edit-user-email" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="edit-user-role" class="form-select">
+                    <option value="student">Student</option>
+                    <option value="security">Security Staff</option>
+                    <option value="admin">Administrator</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('edit-user-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditUser()"><i class="fas fa-check"></i> Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Officer Modal -->
+<div class="modal-overlay" id="assign-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus text-purple"></i> Assign Officer</h3>
+            <button class="modal-close" onclick="closeModal('assign-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p class="mb-2"><strong>Incident:</strong> <span id="assign-incident-id"></span></p>
+            <div class="form-group">
+                <label>Select Officer</label>
+                <select id="assign-officer-select" class="form-select">
+                    <option value="">Choose an officer...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Notes (Optional)</label>
+                <textarea class="form-textarea" placeholder="Additional instructions..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('assign-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="assignOfficer()"><i class="fas fa-check"></i> Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal-overlay" id="update-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-sync-alt text-purple"></i> Update Status</h3>
+            <button class="modal-close" onclick="closeModal('update-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p class="mb-2"><strong>Incident:</strong> <span id="update-incident-id"></span></p>
+            <div class="form-group">
+                <label>New Status</label>
+                <select id="update-status-select" class="form-select">
+                    <option>Pending</option>
+                    <option>In Progress</option>
+                    <option>Resolved</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Add Notes</label>
+                <textarea class="form-textarea" placeholder="Add comments..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('update-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="updateIncidentStatus()"><i class="fas fa-check"></i> Update</button>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-eye text-purple"></i> Incident Details</h3>
+            <button class="modal-close" onclick="closeModal('detail-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="detail-modal-content"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('detail-modal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Comment Modal -->
+<div class="modal-overlay" id="comment-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-comment text-purple"></i> Add Comment</h3>
+            <button class="modal-close" onclick="closeModal('comment-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p class="mb-2"><strong>Incident:</strong> <span id="comment-incident-id"></span></p>
+            <div class="form-group">
+                <label>Comment / Note</label>
+                <textarea id="comment-text" class="form-textarea" placeholder="Add your comment..." rows="4"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('comment-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitComment()"><i class="fas fa-paper-plane"></i> Post</button>
+        </div>
+    </div>
+</div>
+<!-- ==================== PAGE 8: DATABASE VIEWER ==================== -->
+<div class="page" id="database-viewer">
+    <div class="main-content" style="margin-left:0; max-width:1400px; margin:2rem auto;">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title"><i class="fas fa-database text-purple"></i> Database Viewer</h2>
+                    <p class="text-sm text-gray mt-1">View and manage all stored data</p>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="navigateTo('admin-dashboard')">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            </div>
+            
+            <div class="flex gap-2 mb-4 flex-wrap">
+                <button class="btn btn-primary" onclick="viewDatabase('users')">
+                    <i class="fas fa-users"></i> Users
+                </button>
+                <button class="btn btn-primary" onclick="viewDatabase('incidents')">
+                    <i class="fas fa-file-alt"></i> Incidents
+                </button>
+                <button class="btn btn-primary" onclick="viewDatabase('settings')">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button class="btn btn-primary" onclick="viewDatabase('auditLogs')">
+                    <i class="fas fa-history"></i> Audit Logs
+                </button>
+                <button class="btn btn-outline" onclick="exportDatabase()">
+                    <i class="fas fa-download"></i> Export All
+                </button>
+                <button class="btn btn-outline" onclick="clearDatabase()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+            
+            <!-- Storage Stats -->
+            <div class="stats-grid mb-4" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value" id="db-users-count">0</div>
+                        </div>
+                        <div class="stat-icon total"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Total Incidents</div>
+                            <div class="stat-value" id="db-incidents-count">0</div>
+                        </div>
+                        <div class="stat-icon pending"><i class="fas fa-file-alt"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Audit Logs</div>
+                            <div class="stat-value" id="db-logs-count">0</div>
+                        </div>
+                        <div class="stat-icon progress"><i class="fas fa-history"></i></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Storage Used</div>
+                            <div class="stat-value" id="db-storage-size">0 KB</div>
+                        </div>
+                        <div class="stat-icon resolved"><i class="fas fa-database"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="database-content" style="background:#f9fafb; padding:20px; border-radius:8px; min-height:400px; overflow-x:auto;">
+                <p style="color:#6b7280; text-align:center; padding:40px;">
+                    <i class="fas fa-database" style="font-size:48px; color:#d1d5db; margin-bottom:16px; display:block;"></i>
+                    Click a button above to view data
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== PAGE 9: AUDIT LOGS ==================== -->
+<div class="page" id="audit-logs-page">
+    <div class="main-content" style="margin-left:0; max-width:1400px; margin:2rem auto;">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title"><i class="fas fa-shield-alt text-purple"></i> Audit Logs</h2>
+                    <p class="text-sm text-gray mt-1">Track all system activities and user actions</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-outline btn-sm" onclick="filterAuditLogs('all')">
+                        <i class="fas fa-list"></i> All
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="filterAuditLogs('login')">
+                        <i class="fas fa-sign-in-alt"></i> Logins
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="filterAuditLogs('incident')">
+                        <i class="fas fa-file-alt"></i> Incidents
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="filterAuditLogs('user')">
+                        <i class="fas fa-users"></i> Users
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="exportAuditLogs()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="navigateTo('admin-dashboard')">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <input type="text" id="audit-search" class="form-input" placeholder="🔍 Search logs by user, action, or details..." onkeyup="searchAuditLogs()">
+            </div>
+            
+            <div id="audit-logs-content" style="min-height:400px;">
+                <!-- Audit logs will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Chatbot Widget -->
+<div id="ai-chatbot" class="chatbot-container hidden">
+    <div class="chatbot-header">
+        <span>🤖 SecureBot</span>
+        <button onclick="toggleChatbot()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbot-messages">
+        <div class="message bot">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+                <p>Hi! How can I help? 🛡️</p>
+                <div class="quick-replies">
+                    <button onclick="sendQuickReply('How do I report?')" style="padding:6px 10px;background:white;border:1px solid #c4b5fd;border-radius:16px;font-size:12px;color:#7c3aed;cursor:pointer;margin:2px;">📝 Report</button>
+                    <button onclick="sendQuickReply('Track my report')" style="padding:6px 10px;background:white;border:1px solid #c4b5fd;border-radius:16px;font-size:12px;color:#7c3aed;cursor:pointer;margin:2px;">🔍 Track</button>
+                    <button onclick="sendQuickReply('Anonymous report')" style="padding:6px 10px;background:white;border:1px solid #c4b5fd;border-radius:16px;font-size:12px;color:#7c3aed;cursor:pointer;margin:2px;">🕵️ Anonymous</button>
+                    <button onclick="sendQuickReply('Email admin')" style="padding:6px 10px;background:white;border:1px solid #c4b5fd;border-radius:16px;font-size:12px;color:#7c3aed;cursor:pointer;margin:2px;">📧 Email Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chatbot-typing" id="chatbot-typing" style="display:none;">
+        <div class="typing-dots" style="display:flex;gap:3px;">
+            <span style="width:6px;height:6px;background:#a855f7;border-radius:50%;animation:bounce 1.4s infinite;"></span>
+            <span style="width:6px;height:6px;background:#a855f7;border-radius:50%;animation:bounce 1.4s infinite;"></span>
+            <span style="width:6px;height:6px;background:#a855f7;border-radius:50%;animation:bounce 1.4s infinite;"></span>
+        </div>
+    </div>
+    <div class="chatbot-input">
+        <input type="text" id="chatbot-user-input" placeholder="Type..." onkeypress="handleChatInput(event)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;">
+        <button onclick="sendChatMessage()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#A855F7);color:white;border:none;cursor:pointer;">➤</button>
+    </div>
+</div>
+
+<!-- Chatbot Toggle Button -->
+<button class="chatbot-toggle" onclick="toggleChatbot()" title="Chat" style="position:fixed;bottom:24px;right:24px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#A855F7);color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(147,51,234,0.4);z-index:9999;">🤖</button>
+
+
+<script>
+// ===== CHATBOT FUNCTIONS =====
+(function() {
+    console.log('🤖 Initializing chatbot...');
+    
+    // Make toggleChatbot globally available
+    window.toggleChatbot = function() {
+        console.log('🔘 Chatbot toggle clicked!');
+        var chatbot = document.getElementById('ai-chatbot');
+        if (chatbot) {
+            var isHidden = chatbot.classList.contains('hidden');
+            if (isHidden) {
+                chatbot.classList.remove('hidden');
+                console.log('✅ Chatbot opened');
+                setTimeout(function() {
+                    var input = document.getElementById('chatbot-user-input');
+                    if (input) input.focus();
+                }, 100);
+            } else {
+                chatbot.classList.add('hidden');
+                console.log('❌ Chatbot closed');
+            }
+        } else {
+            console.error('❌ Chatbot element not found!');
+        }
+    };
+    
+    window.sendChatMessage = function() {
+        console.log('➤ Send clicked');
+        var input = document.getElementById('chatbot-user-input');
+        var msg = input ? input.value.trim() : '';
+        if (!msg) return;
+        
+        addMessage(msg, 'user');
+        input.value = '';
+        showTyping(true);
+        
+        setTimeout(function() {
+            showTyping(false);
+            addMessage(getBotReply(msg), 'bot');
+        }, 500);
+    };
+    
+    window.handleChatInput = function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window.sendChatMessage();
+        }
+    };
+    
+    window.sendQuickReply = function(text) {
+        console.log('Quick reply:', text);
+        var input = document.getElementById('chatbot-user-input');
+        if (input) {
+            input.value = text;
+            window.sendChatMessage();
+        }
+    };
+    
+    function addMessage(text, sender) {
+        var container = document.getElementById('chatbot-messages');
+        if (!container) {
+            console.error('❌ Messages container not found');
+            return;
+        }
+        
+        var div = document.createElement('div');
+        div.className = 'message ' + sender;
+        div.innerHTML = '<div class="message-avatar">' + (sender === 'bot' ? '🤖' : '👤') + '</div>' +
+                       '<div class="message-content"><p>' + text + '</p></div>';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function showTyping(show) {
+        var typing = document.getElementById('chatbot-typing');
+        if (typing) {
+            typing.style.display = show ? 'flex' : 'none';
+        }
+    }
+    
+    function getBotReply(input) {
+        var txt = input.toLowerCase();
+        if (txt.includes('report')) return '📝 Click "Report Incident" → Fill form → Submit';
+        if (txt.includes('track')) return '🔍 Go to "Track Incident" → Select report';
+        if (txt.includes('anonymous')) return '🕵️ Anonymous: No login needed';
+        if (txt.includes('email') || txt.includes('admin')) return '📧 Email: admin@securereport.com';
+        if (txt.includes('emergency')) return '🚨 Call 911 for emergencies!';
+        if (txt.includes('Hello')) return 'Hi, how can i help you?';
+        return '🤖 I can help with: Report • Track • Anonymous • Email Admin • Hello';
+    }
+    
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        var chatbot = document.getElementById('ai-chatbot');
+        var toggle = document.querySelector('.chatbot-toggle');
+        if (chatbot && !chatbot.classList.contains('hidden')) {
+            if (!chatbot.contains(e.target) && toggle && !toggle.contains(e.target)) {
+                chatbot.classList.add('hidden');
+            }
+        }
+    });
+    
+    console.log('✅ Chatbot functions loaded and ready!');
+    
+    // Test that function is accessible
+    console.log('toggleChatbot available:', typeof window.toggleChatbot);
+})();
+</script>
+
+<!-- Local JS -->
+<script src="js/database.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Leaflet JS (Free Maps) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</body>
+</html>
